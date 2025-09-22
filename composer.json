@@ -1,0 +1,26 @@
+{
+  "name": "cdyun/php-tool",
+  "type": "library",
+  "license": "MIT",
+  "description": "Webman plugin cdyun/php-tool",
+  "keywords": [
+    "php",
+    "cdyun"
+  ],
+  "authors": [
+    {
+      "name": "cdyun",
+      "email": "121625706@qq.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "symfony/uid": "^7.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cdyun\\PhpTool\\": "src"
+    }
+  }
+}
