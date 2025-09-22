@@ -247,4 +247,67 @@ class ToolEnforcer
         }
         return $menu;
     }
+
+    /**
+     * @param array|string $data - 待转换的数据，可以是数组或字符串
+     * @return array|string
+     * @author cdyun(121625706@qq.com)
+     * @desc 下划线命名转驼峰命名
+     */
+    public static function snakeToCamel(array|string $data): array|string
+    {
+        // 如果是字符串，直接处理
+        if (is_string($data)) {
+            return preg_replace_callback('/_([a-z])/', function ($matches) {
+                return strtoupper($matches[1]);
+            }, $data);
+        }
+
+        // 如果是数组，递归处理
+        $result = [];
+        foreach ($data as $key => $value) {
+            // 将下划线分隔的字段名转换为驼峰命名
+            $camelKey = preg_replace_callback('/_([a-z])/', function ($matches) {
+                return strtoupper($matches[1]);
+            }, $key);
+
+            // 如果值是数组，递归处理
+            if (is_array($value)) {
+                $result[$camelKey] = self::snakeToCamel($value);
+            } else {
+                $result[$camelKey] = $value;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param array|string $data - 待转换的数据，可以是数组或字符串
+     * @return array|string
+     * @author cdyun(121625706@qq.com)
+     * @desc 驼峰命名转下划线命名
+     */
+    public static function camelToSnake(array|string $data): array|string
+    {
+        // 如果是字符串，直接处理
+        if (is_string($data)) {
+            return strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($data)));
+        }
+
+        // 如果是数组，递归处理
+        $result = [];
+        foreach ($data as $key => $value) {
+            // 将驼峰命名的字段名转换为下划线分隔的字段名
+            $snakeKey = strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($key)));
+
+            // 如果值是数组，递归处理
+            if (is_array($value)) {
+                $result[$snakeKey] = self::camelToSnake($value);
+            } else {
+                $result[$snakeKey] = $value;
+            }
+        }
+        return $result;
+    }
+
 }
