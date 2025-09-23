@@ -2,7 +2,7 @@
   "name": "cdyun/php-tool",
   "type": "library",
   "license": "MIT",
-  "description": "Webman plugin cdyun/php-tool",
+  "description": "PHP开发常用的方法集合",
   "keywords": [
     "php",
     "cdyun"
