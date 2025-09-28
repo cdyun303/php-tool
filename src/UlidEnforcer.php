@@ -1,6 +1,6 @@
 <?php
 /**
- * @desc UlidEnforcer.php
+ * UlidEnforcer.php
  * @author cdyun(121625706@qq.com)
  * @date 2025/9/22 20:38
  */
@@ -15,7 +15,7 @@ class UlidEnforcer
     /**
      * @return Ulid
      * @author cdyun(121625706@qq.com)
-     * @desc 生成ulid
+     * 生成ulid
      */
     public static function generate(): Ulid
     {
@@ -26,7 +26,7 @@ class UlidEnforcer
      * @param string $id
      * @return int
      * @author cdyun(121625706@qq.com)
-     * @desc Ulid 转 时间戳
+     * Ulid 转 时间戳
      */
     public static function toTimestamp(string $id): int
     {
@@ -42,7 +42,7 @@ class UlidEnforcer
      * @param string $format
      * @return string
      * @author cdyun(121625706@qq.com)
-     * @desc Ulid 转 时间日期
+     * Ulid 转 时间日期
      */
     public static function toDate(string $id, string $format = 'Y-m-d H:i:s'): string
     {
