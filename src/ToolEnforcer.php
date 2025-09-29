@@ -287,7 +287,7 @@ class ToolEnforcer
             // 将下划线分隔的字段名转换为驼峰命名
             $camelKey = preg_replace_callback('/_([a-z])/', function ($matches) {
                 return strtoupper($matches[1]);
-            }, $key);
+            }, (string)$key);
 
             // 如果值是数组，递归处理
             if (is_array($value)) {
@@ -315,13 +315,16 @@ class ToolEnforcer
         // 如果是数组，递归处理
         $result = [];
         foreach ($data as $key => $value) {
+            // 确保键名是字符串后再进行转换
+            $stringKey = (string)$key;
             // 将驼峰命名的字段名转换为下划线分隔的字段名
-            $snakeKey = strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($key)));
+            $snakeKey = strtolower(preg_replace('/([A-Z])/', '_$1', lcfirst($stringKey)));
 
             // 如果值是数组，递归处理
             if (is_array($value)) {
                 $result[$snakeKey] = self::camelToSnake($value);
             } else {
+                // 确保传递给 preg_replace_callback 的是字符串
                 $result[$snakeKey] = $value;
             }
         }
