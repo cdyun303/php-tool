@@ -16,7 +16,8 @@
   ],
   "require": {
     "php": "^8.1",
-    "symfony/uid": "^7.3"
+    "symfony/uid": "^7.3",
+    "ext-iconv": "*"
   },
   "autoload": {
     "psr-4": {
