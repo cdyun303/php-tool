@@ -411,4 +411,44 @@ class ToolEnforcer
         return $result;
     }
 
+    /**
+     * 搜索文件夹下全部文件返回树形结构，指定扩展名，暂时不支持中文文件名
+     * @param string $path - 搜索绝对路径
+     * @param string $prefix - 定义前缀路径
+     * @param array $ext - 扩展名
+     * @return array
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function scanFileTree(string $path, string $prefix = '', array $ext = ['html']): array
+    {
+        if (!is_dir($path))
+            return [];
+        // 兼容各操作系统
+        $path = rtrim(str_replace('\\', '/', $path), '/');
+        $result = [];
+        $files = scandir($path);
+        foreach ($files as $vo) {
+            if ($vo != '.' && $vo != '..') {
+                $vo = iconv("GBK  ", "utf-8", $vo);
+                $value = $prefix ? $prefix . '/' . basename($vo) : basename($vo);
+                if (is_dir($path . '/' . $vo)) {
+                    $t = [
+                        'name' => basename($vo),
+                        'value' => $value,
+                        'children' => self::scanFileTree($path . '/' . $vo, $value, $ext)
+                    ];
+                    $result[] = $t;
+                } else {
+                    if (in_array(pathinfo($vo, PATHINFO_EXTENSION), $ext)) {
+                        $t = [
+                            'name' => basename($vo),
+                            'value' => $value,
+                        ];
+                        $result[] = $t;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 }
