@@ -494,7 +494,7 @@ class ToolEnforcer
      * @return array
      * @author cdyun(121625706@qq.com)
      */
-    public function listFileContent($path, $fileName): array
+    public static function listFileContent($path, $fileName): array
     {
         $result = [];
         if (empty($path) || empty($fileName)) {
