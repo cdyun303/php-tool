@@ -361,27 +361,6 @@ class ToolEnforcer
     }
 
     /**
-     * 搜索指定路径下的【直系】文件夹
-     * @param string $path
-     * @return array
-     * @author cdyun(121625706@qq.com)
-     */
-    public static function scanFolder(string $path): array
-    {
-        if (!is_dir($path)) return [];
-        // 兼容各操作系统
-        $path = rtrim(str_replace('\\', '/', $path), '/') . '/';
-        $result = [];
-        $files = scandir($path);
-        foreach ($files as $vo) {
-            if ($vo != '.' && $vo != '..' && is_dir($path . '/' . $vo)) {
-                $result[] = $vo;
-            }
-        }
-        return $result;
-    }
-
-    /**
      * 搜索文件夹下全部文件，指定扩展名，暂时不支持中文文件名
      * @param string $path
      * @param array $ext
@@ -450,5 +429,81 @@ class ToolEnforcer
             }
         }
         return $result;
+    }
+
+    /**
+     * 获取指定路径文件夹下所有直系文件夹中所有指定文件名的文件内容
+     * @param $path - 文件路径
+     * @param $fileName - 文件名，不含扩展名
+     * @return array
+     * @author cdyun(121625706@qq.com)
+     */
+    public function listFileContent($path, $fileName): array
+    {
+        $result = [];
+        if (empty($path) || empty($fileName)) {
+            return $result;
+        }
+        $folders = self::scanFolder($path);
+        foreach ($folders as $item) {
+            // 防止路径遍历攻击，过滤特殊字符
+            if (str_contains($item, '..') || str_contains($item, "\0")) {
+                continue;
+            }
+            $fullPath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($item, DIRECTORY_SEPARATOR);
+            $data = self::getFileContent($fullPath, $fileName);
+
+            if (!empty($data)) {
+                $result[$item] = $data;
+            }
+
+        }
+        return $result;
+    }
+
+    /**
+     * 搜索指定路径下的【直系】文件夹
+     * @param string $path
+     * @return array
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function scanFolder(string $path): array
+    {
+        if (!is_dir($path)) return [];
+        // 兼容各操作系统
+        $path = rtrim(str_replace('\\', '/', $path), '/') . '/';
+        $result = [];
+        $files = scandir($path);
+        foreach ($files as $vo) {
+            if ($vo != '.' && $vo != '..' && is_dir($path . '/' . $vo)) {
+                $result[] = $vo;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 获取文件内容
+     * @param $path - 文件路径
+     * @param $fileName - 文件名，不含扩展名
+     * @return array|mixed
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function getFileContent($path, $fileName): mixed
+    {
+        // 验证输入参数
+        if (empty($path) || empty($fileName)) {
+            return [];
+        }
+
+        // 规范化文件名，防止路径遍历攻击
+        $safeFileName = basename($fileName);
+        $filePath = rtrim($path, '/\\') . DIRECTORY_SEPARATOR . $safeFileName . '.php';
+
+        // 检查文件是否存在且为常规文件
+        if (!file_exists($filePath) || !is_file($filePath)) {
+            return [];
+        }
+        return include $filePath;
     }
 }
