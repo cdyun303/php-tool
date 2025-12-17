@@ -432,6 +432,62 @@ class ToolEnforcer
     }
 
     /**
+     * 获取操作系统
+     * @param string $user_agent
+     * @return string
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function os(string $user_agent): string
+    {
+        if (empty($user_agent)) {
+            return 'Unknown';
+        }
+
+        $osPatterns = [
+            '/windows|winnt|win32|win64/i' => 'Windows',
+            '/macintosh|mac os/i' => 'Mac',
+            '/linux/i' => 'Linux'
+        ];
+
+        foreach ($osPatterns as $pattern => $osName) {
+            if (preg_match($pattern, $user_agent)) {
+                return $osName;
+            }
+        }
+
+        return 'Other';
+    }
+
+    /**
+     * 根据用户代理字符串识别浏览器类型
+     *
+     * @param string $user_agent 用户代理字符串
+     * @return string 浏览器名称(MSIE/Firefox/Chrome/Safari/Opera/Other/Unknown)
+     */
+    public static function browse(string $user_agent): string
+    {
+        if (empty($user_agent)) {
+            return 'Unknown';
+        }
+
+        // 通过正则表达式匹配不同的浏览器标识
+        if (preg_match('/MSIE/i', $user_agent)) {
+            $br = 'MSIE';
+        } elseif (preg_match('/Firefox/i', $user_agent)) {
+            $br = 'Firefox';
+        } elseif (preg_match('/Chrome/i', $user_agent)) {
+            $br = 'Chrome';
+        } elseif (preg_match('/Safari/i', $user_agent)) {
+            $br = 'Safari';
+        } elseif (preg_match('/Opera/i', $user_agent)) {
+            $br = 'Opera';
+        } else {
+            $br = 'Other';
+        }
+        return $br;
+    }
+
+    /**
      * 获取指定路径文件夹下所有直系文件夹中所有指定文件名的文件内容
      * @param $path - 文件路径
      * @param $fileName - 文件名，不含扩展名
@@ -506,4 +562,5 @@ class ToolEnforcer
         }
         return include $filePath;
     }
+
 }
