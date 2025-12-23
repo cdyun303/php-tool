@@ -4,6 +4,7 @@
  * @author cdyun(121625706@qq.com)
  * @date 2025/9/22 20:44
  */
+
 declare(strict_types=1);
 
 namespace Cdyun\PhpTool;
@@ -142,45 +143,125 @@ class ToolEnforcer
     }
 
     /**
+     * 数组转树形结构
      * @param array $list - 数据列表
      * @param int $rootId - 根节点ID，默认为0
      * @param string $pidField - 父级字段名，默认为'pid'
      * @param string $idField - 主键字段名，默认为'id'
      * @param string $childrenField - 子节点字段名，默认为'children'
+     * @param int $maxLevel - 最大层级，默认为10
+     * @param int $startLevel - 开始层级，默认为0，注意要小于最大层级
      * @return array
      * @author cdyun(121625706@qq.com)
-     * 数组转树形结构
      */
-    public static function arrayToTree(array $list, int $rootId = 0, string $pidField = 'pid', string $idField = 'id', string $childrenField = 'children'): array
+    public function arrayToTree(
+        array  $list,
+        int    $rootId = 0,
+        string $pidField = 'parent_id',
+        string $idField = 'id',
+        string $childrenField = 'children',
+        int    $maxLevel = 10,
+        int    $startLevel = 0
+    ): array
     {
         if (empty($list)) {
             return [];
         }
 
-        // 构建映射表
+        // 构建映射表，同时添加层级信息
         $map = [];
+        $levelMap = []; // 存储每个节点的层级
         foreach ($list as $key => $item) {
-            $map[$item[$idField]] = $item;
+            $itemId = $item[$idField];
+            $map[$itemId] = $item;
+            $levelMap[$itemId] = 0; // 初始层级为0
         }
 
         $tree = [];
 
         foreach ($list as $key => $item) {
+            $itemId = $item[$idField];
+            $parentId = $item[$pidField];
+
+            // 计算当前节点层级
+            $currentLevel = $this->calculateLevel($map, $itemId, $pidField, $levelMap, $maxLevel, $startLevel);
+
+            // 如果超过最大层级，跳过该节点
+            if ($currentLevel > $maxLevel) {
+                continue;
+            }
+
             // 如果当前节点的父节点是根节点
-            if ($item[$pidField] == $rootId) {
-                $tree[] = &$map[$item[$idField]];
+            if ($parentId == $rootId) {
+                $map[$itemId]['level'] = $currentLevel; // 添加层级信息到节点
+                $tree[] = &$map[$itemId];
             } // 如果当前节点有父节点且父节点存在
-            elseif (isset($map[$item[$pidField]])) {
-                // 初始化父节点的children字段
-                if (!isset($map[$item[$pidField]][$childrenField])) {
-                    $map[$item[$pidField]][$childrenField] = [];
+            elseif (isset($map[$parentId])) {
+                // 检查父节点层级是否已达到最大值
+                $parentLevel = $levelMap[$parentId] ?? 0;
+                if ($parentLevel >= $maxLevel) {
+                    continue; // 父节点已达最大层级，不添加子节点
                 }
-                $map[$item[$pidField]][$childrenField][] = &$map[$item[$idField]];
+
+                // 初始化父节点的children字段
+                if (!isset($map[$parentId][$childrenField])) {
+                    $map[$parentId][$childrenField] = [];
+                }
+
+                $map[$itemId]['level'] = $currentLevel; // 添加层级信息到节点
+                $map[$parentId][$childrenField][] = &$map[$itemId];
             }
         }
 
-        unset($map);
+        unset($map, $levelMap);
         return $tree;
+    }
+
+
+    /**
+     * 计算树形节点层级
+     * @param array $map 节点映射表
+     * @param mixed $itemId 当前节点ID
+     * @param string $pidField 父节点字段名
+     * @param array $levelMap 层级映射表
+     * @param int $maxLevel 获取的最大层级
+     * @param int $startLevel 默认起始层级0，注意要小于最大层级
+     * @return int 节点层级
+     */
+    private function calculateLevel(
+        array  $map,
+        mixed  $itemId,
+        string $pidField,
+        array  &$levelMap,
+        int    $maxLevel,
+        int    $startLevel = 0
+    ): int
+    {
+        if (isset($levelMap[$itemId]) && $levelMap[$itemId] > 0) {
+            return $levelMap[$itemId]; // 如果已计算过，直接返回
+        }
+
+        $item = $map[$itemId] ?? null;
+        if (!$item) {
+            return 0;
+        }
+
+        $parentId = $item[$pidField];
+
+        // 如果是根节点或父节点不存在，修改此处的值会改变树形数组的层级初始值
+        if ($parentId == 0 || $parentId == null || !isset($map[$parentId])) {
+            $levelMap[$itemId] = $startLevel;
+            return $startLevel;
+        }
+
+        // 递归计算父节点层级
+        $parentLevel = $this->calculateLevel($map, $parentId, $pidField, $levelMap, $maxLevel, $startLevel);
+        $currentLevel = $parentLevel + 1;
+
+        // 不超过最大层级
+        $levelMap[$itemId] = min($currentLevel, $maxLevel);
+
+        return $levelMap[$itemId];
     }
 
     /**
