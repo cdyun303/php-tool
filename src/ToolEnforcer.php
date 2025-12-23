@@ -154,7 +154,7 @@ class ToolEnforcer
      * @return array
      * @author cdyun(121625706@qq.com)
      */
-    public function arrayToTree(
+    public static function arrayToTree(
         array  $list,
         int    $rootId = 0,
         string $pidField = 'parent_id',
@@ -184,7 +184,7 @@ class ToolEnforcer
             $parentId = $item[$pidField];
 
             // 计算当前节点层级
-            $currentLevel = $this->calculateLevel($map, $itemId, $pidField, $levelMap, $maxLevel, $startLevel);
+            $currentLevel = self::calculateLevel($map, $itemId, $pidField, $levelMap, $maxLevel, $startLevel);
 
             // 如果超过最大层级，跳过该节点
             if ($currentLevel > $maxLevel) {
@@ -228,7 +228,7 @@ class ToolEnforcer
      * @param int $startLevel 默认起始层级0，注意要小于最大层级
      * @return int 节点层级
      */
-    private function calculateLevel(
+    private static function calculateLevel(
         array  $map,
         mixed  $itemId,
         string $pidField,
@@ -255,7 +255,7 @@ class ToolEnforcer
         }
 
         // 递归计算父节点层级
-        $parentLevel = $this->calculateLevel($map, $parentId, $pidField, $levelMap, $maxLevel, $startLevel);
+        $parentLevel = self::calculateLevel($map, $parentId, $pidField, $levelMap, $maxLevel, $startLevel);
         $currentLevel = $parentLevel + 1;
 
         // 不超过最大层级
