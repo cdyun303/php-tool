@@ -644,4 +644,39 @@ class ToolEnforcer
         return include $filePath;
     }
 
+    /**
+     * 过滤html格式,空格，换行
+     * @param $content - html内容
+     * @return string
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function filterHtml($content): string
+    {
+        $content = trim($content); //清除字符串两边的空格
+        $content = strip_tags($content, ""); //利用php自带的函数清除html格式
+        $content = preg_replace("/\t/", "", $content); //使用正则表达式替换内容，如：空格，换行，并将替换为空。
+        $content = preg_replace("/\r\n/", "", $content);
+        $content = preg_replace("/\r/", "", $content);
+        $content = preg_replace("/\n/", "", $content);
+        $content = preg_replace("/ /", "", $content);
+        $content = preg_replace("/  /", "", $content);  //匹配html中的空格
+        return trim($content); //返回字符串
+    }
+
+    /**
+     * 截取中文指定字节
+     * @param string $str - 待截取的字符串
+     * @param int $utf8len - 截取字节数
+     * @param string $encoding - 字符编码
+     * @param string $file - 后缀标识
+     * @return string
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function substrContentWithUtf8(string $str, int $utf8len = 100, string $encoding = 'UTF-8', string $file = '...'): string
+    {
+        if (mb_strlen($str, $encoding) > $utf8len) {
+            $str = mb_substr($str, 0, $utf8len, $encoding) . $file;
+        }
+        return $str;
+    }
 }
