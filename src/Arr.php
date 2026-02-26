@@ -2,16 +2,18 @@
 /**
  * Arr.php
  * @author cdyun(121625706@qq.com)
- * @date 2026/2/23 17:15
+ * @date 2026/2/25 00:54
  */
 
 declare (strict_types=1);
 
-namespace Cdyun\PhpTool\Array;
+namespace Cdyun\PhpTool;
 
+/**
+ * 数组工具类
+ */
 class Arr
 {
-
     /**
      * 数组转树形结构
      * @param array $list 数组
@@ -22,6 +24,9 @@ class Arr
      */
     public static function tree(array $list, string $idField = 'id', string $parentIdField = 'parent_id', string $childrenField = 'children'): array
     {
+        if (empty($list)) {
+            return [];
+        }
         $tree = [];
         $map = [];
         foreach ($list as $item) {
@@ -33,6 +38,45 @@ class Arr
                 $map[$item[$parentIdField]][$childrenField][] = &$map[$item[$idField]];
             } else {
                 $tree[] = &$map[$item[$idField]];
+            }
+        }
+        return $tree;
+    }
+
+    /**
+     * 按指定根节点ID，将扁平化数组转换为树形结构，会过滤掉非指定根节点及子节点的数据
+     * @param array $list 包含父子关系的扁平化数组
+     * @param int $rootId 根节点ID，默认为0
+     * @param string $idField ID字段名，默认为'id'
+     * @param string $pidField 父ID字段名，默认为'parent_id'
+     * @param string $childrenField 子节点字段名，默认为'children'
+     * @return array 树形结构数组
+     */
+    public static function toTree(array $list, int $rootId = 0, string $idField = 'id', string $pidField = 'parent_id', string $childrenField = 'children'): array
+    {
+        if (empty($list)) {
+            return [];
+        }
+
+        // 构建映射表
+        $map = [];
+        foreach ($list as $item) {
+            $map[$item[$idField]] = $item;
+            $map[$item[$idField]][$childrenField] = [];
+        }
+
+        $tree = [];
+        foreach ($list as $item) {
+            // 如果当前节点的父节点是根节点
+            if ($item[$pidField] == $rootId) {
+                $tree[] = &$map[$item[$idField]];
+            } // 如果当前节点有父节点且父节点存在
+            elseif (isset($map[$item[$pidField]])) {
+                // 初始化父节点的children字段
+                if (!isset($map[$item[$pidField]][$childrenField])) {
+                    $map[$item[$pidField]][$childrenField] = [];
+                }
+                $map[$item[$pidField]][$childrenField][] = &$map[$item[$idField]];
             }
         }
         return $tree;
@@ -527,7 +571,7 @@ class Arr
     }
 
     /**
-     * 数组查找
+     * 查找满足条件的第一个元素的键值
      * @param array $array 数组
      * @param callable $callback 回调函数
      * @return mixed|null 查找结果
@@ -546,7 +590,7 @@ class Arr
     }
 
     /**
-     * 数组查找键名
+     * 查找满足条件的第一个元素的键名
      * @param array $array 数组
      * @param callable $callback 回调函数
      * @return string|int|null 键名

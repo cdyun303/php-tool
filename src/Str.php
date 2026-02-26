@@ -2,32 +2,20 @@
 /**
  * Str.php
  * @author cdyun(121625706@qq.com)
- * @date 2026/2/23 17:38
+ * @date 2026/2/25 00:55
  */
 
 declare (strict_types=1);
 
-namespace Cdyun\PhpTool\String;
+namespace Cdyun\PhpTool;
 
+/**
+ * 字符串工具类
+ */
 class Str
 {
     /**
-     * 生成UUID
-     * @return string UUID
-     */
-    public static function uuid(): string
-    {
-        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            random_int(0, 0xffff), random_int(0, 0xffff),
-            random_int(0, 0xffff),
-            random_int(0, 0x0fff) | 0x4000,
-            random_int(0, 0x3fff) | 0x8000,
-            random_int(0, 0xffff), random_int(0, 0xffff), random_int(0, 0xffff)
-        );
-    }
-
-    /**
-     * 大驼峰命名
+     * 首字母大写驼峰命名
      * @param string $str 字符串
      * @return string 大驼峰命名
      */
@@ -132,21 +120,6 @@ class Str
     }
 
     /**
-     * 字符串格式化（类似Python的str.format）
-     * @param string $str 模板字符串
-     * @param array $data 数据
-     * @return string 格式化后的字符串
-     */
-    public static function format(string $str, array $data): string
-    {
-        $replace = [];
-        foreach ($data as $key => $value) {
-            $replace['{' . $key . '}'] = $value;
-        }
-        return str_replace(array_keys($replace), array_values($replace), $str);
-    }
-
-    /**
      * 字符串分割（支持多种分隔符）
      * @param string $str 字符串
      * @param string|array $delimiters 分隔符
@@ -210,25 +183,28 @@ class Str
     /**
      * 下划线命名转驼峰命名(支持数组键名)
      * @param array|string $data - 待转换的数据，数组或字符串
+     * @param bool $isUcfirst - 是否首字母大写
      * @return array|string
      * @author cdyun(121625706@qq.com)
      */
-    public static function toCamel(array|string $data): array|string
+    public static function toCamel(array|string $data, bool $isUcfirst = false): array|string
     {
         // 如果是字符串，直接处理
         if (is_string($data)) {
+            $str = $isUcfirst ? ucfirst($data) : $data;
             return preg_replace_callback('/_([a-z])/', function ($matches) {
                 return strtoupper($matches[1]);
-            }, $data);
+            }, $str);
         }
 
         // 如果是数组，递归处理
         $result = [];
         foreach ($data as $key => $value) {
+            $str = $isUcfirst ? ucfirst((string)$key) : (string)$key;
             // 将下划线分隔的字段名转换为驼峰命名
             $camelKey = preg_replace_callback('/_([a-z])/', function ($matches) {
                 return strtoupper($matches[1]);
-            }, (string)$key);
+            }, $str);
 
             // 如果值是数组，递归处理
             if (is_array($value)) {
@@ -314,6 +290,22 @@ class Str
     }
 
     /**
+     * 手机号脱敏
+     * @param string $phone 手机号
+     * @param int $keepStart 保留前几位
+     * @param int $keepEnd 保留后几位
+     * @return string 脱敏后的手机号
+     */
+    public static function maskPhone(string $phone, int $keepStart = 3, int $keepEnd = 4): string
+    {
+        $length = strlen($phone);
+        if ($length <= $keepStart + $keepEnd) {
+            return $phone;
+        }
+        return self::mask($phone, $keepStart, $length - $keepStart - $keepEnd);
+    }
+
+    /**
      * 字符串脱敏
      * @param string $str 字符串
      * @param int $start 开始位置
@@ -337,22 +329,6 @@ class Str
         $mask_length = $end - $start;
         $mask_str = str_repeat($mask, $mask_length);
         return substr_replace($str, $mask_str, $start, $mask_length);
-    }
-
-    /**
-     * 手机号脱敏
-     * @param string $phone 手机号
-     * @param int $keepStart 保留前几位
-     * @param int $keepEnd 保留后几位
-     * @return string 脱敏后的手机号
-     */
-    public static function maskPhone(string $phone, int $keepStart = 3, int $keepEnd = 4): string
-    {
-        $length = strlen($phone);
-        if ($length <= $keepStart + $keepEnd) {
-            return $phone;
-        }
-        return self::mask($phone, $keepStart, $length - $keepStart - $keepEnd);
     }
 
     /**
@@ -592,6 +568,21 @@ class Str
     }
 
     /**
+     * 字符串格式化（类似Python的str.format）
+     * @param string $str 模板字符串
+     * @param array $data 数据
+     * @return string 格式化后的字符串
+     */
+    public static function format(string $str, array $data): string
+    {
+        $replace = [];
+        foreach ($data as $key => $value) {
+            $replace['{' . $key . '}'] = $value;
+        }
+        return str_replace(array_keys($replace), array_values($replace), $str);
+    }
+
+    /**
      * 字符串转IP地址
      * @param string $str 字符串
      * @return string IP地址
@@ -628,104 +619,6 @@ class Str
     {
         $str = trim($str);
         if (filter_var($str, FILTER_VALIDATE_URL)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转手机号码
-     * @param string $str 字符串
-     * @return string 手机号码
-     */
-    public static function toPhone(string $str): string
-    {
-        $str = preg_replace('/[^0-9]/', '', $str);
-        if (preg_match('/^1[3-9]\d{9}$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转身份证号
-     * @param string $str 字符串
-     * @return string 身份证号
-     */
-    public static function toIdCard(string $str): string
-    {
-        $str = preg_replace('/[^0-9Xx]/', '', $str);
-        if (preg_match('/^\d{17}[0-9Xx]$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转银行卡号
-     * @param string $str 字符串
-     * @return string 银行卡号
-     */
-    public static function toBankCard(string $str): string
-    {
-        $str = preg_replace('/[^0-9]/', '', $str);
-        if (preg_match('/^\d{16,19}$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转车牌号
-     * @param string $str 字符串
-     * @return string 车牌号
-     */
-    public static function toCarPlate(string $str): string
-    {
-        $str = trim($str);
-        if (preg_match('/^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转邮编
-     * @param string $str 字符串
-     * @return string 邮编
-     */
-    public static function toPostCode(string $str): string
-    {
-        $str = preg_replace('/[^0-9]/', '', $str);
-        if (preg_match('/^\d{6}$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转QQ号
-     * @param string $str 字符串
-     * @return string QQ号
-     */
-    public static function toQq(string $str): string
-    {
-        $str = preg_replace('/[^0-9]/', '', $str);
-        if (preg_match('/^[1-9]\d{4,10}$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
-     * 字符串转微信号
-     * @param string $str 字符串
-     * @return string 微信号
-     */
-    public static function toWechat(string $str): string
-    {
-        $str = trim($str);
-        if (preg_match('/^[a-zA-Z][a-zA-Z0-9_-]{5,19}$/', $str)) {
             return $str;
         }
         return '';
@@ -959,20 +852,6 @@ class Str
     }
 
     /**
-     * 字符串转支付宝账号
-     * @param string $str 字符串
-     * @return string 支付宝账号
-     */
-    public static function toAlipay(string $str): string
-    {
-        $str = trim($str);
-        if (filter_var($str, FILTER_VALIDATE_EMAIL) || preg_match('/^1[3-9]\d{9}$/', $str)) {
-            return $str;
-        }
-        return '';
-    }
-
-    /**
      * 字符串转银行卡号（带空格）
      * @param string $str 银行卡号
      * @return string 带空格的银行卡号
@@ -984,6 +863,20 @@ class Str
             return '';
         }
         return preg_replace('/(\d{4})(?=\d)/', '$1 ', $str);
+    }
+
+    /**
+     * 字符串转银行卡号
+     * @param string $str 字符串
+     * @return string 银行卡号
+     */
+    public static function toBankCard(string $str): string
+    {
+        $str = preg_replace('/[^0-9]/', '', $str);
+        if (preg_match('/^\d{16,19}$/', $str)) {
+            return $str;
+        }
+        return '';
     }
 
     /**
@@ -1001,6 +894,20 @@ class Str
     }
 
     /**
+     * 字符串转身份证号
+     * @param string $str 字符串
+     * @return string 身份证号
+     */
+    public static function toIdCard(string $str): string
+    {
+        $str = preg_replace('/[^0-9Xx]/', '', $str);
+        if (preg_match('/^\d{17}[0-9Xx]$/', $str)) {
+            return $str;
+        }
+        return '';
+    }
+
+    /**
      * 字符串转手机号（带空格）
      * @param string $str 手机号
      * @return string 带空格的手机号
@@ -1012,6 +919,20 @@ class Str
             return '';
         }
         return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1 $2 $3', $str);
+    }
+
+    /**
+     * 字符串转手机号码
+     * @param string $str 字符串
+     * @return string 手机号码
+     */
+    public static function toPhone(string $str): string
+    {
+        $str = preg_replace('/[^0-9]/', '', $str);
+        if (preg_match('/^1[3-9]\d{9}$/', $str)) {
+            return $str;
+        }
+        return '';
     }
 
     /**
@@ -1029,6 +950,20 @@ class Str
     }
 
     /**
+     * 字符串转车牌号
+     * @param string $str 字符串
+     * @return string 车牌号
+     */
+    public static function toCarPlate(string $str): string
+    {
+        $str = trim($str);
+        if (preg_match('/^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/', $str)) {
+            return $str;
+        }
+        return '';
+    }
+
+    /**
      * 字符串转邮编（带空格）
      * @param string $str 邮编
      * @return string 带空格的邮编
@@ -1040,6 +975,20 @@ class Str
             return '';
         }
         return preg_replace('/(\d{3})(\d{3})/', '$1 $2', $str);
+    }
+
+    /**
+     * 字符串转邮编
+     * @param string $str 字符串
+     * @return string 邮编
+     */
+    public static function toPostCode(string $str): string
+    {
+        $str = preg_replace('/[^0-9]/', '', $str);
+        if (preg_match('/^\d{6}$/', $str)) {
+            return $str;
+        }
+        return '';
     }
 
     /**
@@ -1057,6 +1006,20 @@ class Str
     }
 
     /**
+     * 字符串转QQ号
+     * @param string $str 字符串
+     * @return string QQ号
+     */
+    public static function toQq(string $str): string
+    {
+        $str = preg_replace('/[^0-9]/', '', $str);
+        if (preg_match('/^[1-9]\d{4,10}$/', $str)) {
+            return $str;
+        }
+        return '';
+    }
+
+    /**
      * 字符串转微信号（带空格）
      * @param string $str 微信号
      * @return string 带空格的微信号
@@ -1068,6 +1031,20 @@ class Str
             return '';
         }
         return preg_replace('/(\w{4})(?=\w)/', '$1 ', $str);
+    }
+
+    /**
+     * 字符串转微信号
+     * @param string $str 字符串
+     * @return string 微信号
+     */
+    public static function toWechat(string $str): string
+    {
+        $str = trim($str);
+        if (preg_match('/^[a-zA-Z][a-zA-Z0-9_-]{5,19}$/', $str)) {
+            return $str;
+        }
+        return '';
     }
 
     /**
@@ -1085,6 +1062,20 @@ class Str
             return preg_replace('/(\w{4})(?=\w)/', '$1 ', $str);
         }
         return preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1 $2 $3', $str);
+    }
+
+    /**
+     * 字符串转支付宝账号
+     * @param string $str 字符串
+     * @return string 支付宝账号
+     */
+    public static function toAlipay(string $str): string
+    {
+        $str = trim($str);
+        if (filter_var($str, FILTER_VALIDATE_EMAIL) || preg_match('/^1[3-9]\d{9}$/', $str)) {
+            return $str;
+        }
+        return '';
     }
 
     /**
@@ -1243,18 +1234,6 @@ class Str
     }
 
     /**
-     * 字符串替换
-     * @param string $str 字符串
-     * @param string $search 查找字符串
-     * @param string $replace 替换字符串
-     * @return string 替换后的字符串
-     */
-    public static function replace(string $str, string $search, string $replace): string
-    {
-        return str_replace($search, $replace, $str);
-    }
-
-    /**
      * 字符串替换多个
      * @param string $str 字符串
      * @param array $replace 替换数组
@@ -1274,6 +1253,18 @@ class Str
     public static function remove(string $str, string $search): string
     {
         return self::replace($str, $search, '');
+    }
+
+    /**
+     * 字符串替换
+     * @param string $str 字符串
+     * @param string $search 查找字符串
+     * @param string $replace 替换字符串
+     * @return string 替换后的字符串
+     */
+    public static function replace(string $str, string $search, string $replace): string
+    {
+        return str_replace($search, $replace, $str);
     }
 
     /**

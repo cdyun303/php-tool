@@ -2,16 +2,15 @@
 /**
  * Ip.php
  * @author cdyun(121625706@qq.com)
- * @date 2026/2/23 18:15
+ * @date 2026/2/25 00:55
  */
 
 declare (strict_types=1);
 
-namespace Cdyun\PhpTool\Ip;
+namespace Cdyun\PhpTool;
 
 /**
  * IP地址工具类
- * 提供IP地址获取、验证和操作功能
  */
 class Ip
 {

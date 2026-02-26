@@ -2,17 +2,15 @@
 /**
  * Math.php
  * @author cdyun(121625706@qq.com)
- * @date 2026/2/23 18:17
+ * @date 2026/2/25 00:55
  */
 
 declare (strict_types=1);
 
-namespace Cdyun\PhpTool\Math;
+namespace Cdyun\PhpTool;
 
 /**
- * 高精度数学计算工具类
- * 解决浮点数精度丢失问题
- * 支持加减乘除、四舍五入、比较等操作
+ * 数学计算工具类
  */
 class Math
 {
@@ -714,4 +712,3 @@ class Math
         return self::mul($stdDev, $stdDev, $scale);
     }
 }
-

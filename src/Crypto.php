@@ -2,13 +2,16 @@
 /**
  * Crypto.php
  * @author cdyun(121625706@qq.com)
- * @date 2026/2/23 17:22
+ * @date 2026/2/25 00:56
  */
 
 declare (strict_types=1);
 
-namespace Cdyun\PhpTool\Crypto;
+namespace Cdyun\PhpTool;
 
+/**
+ * 加解密工具类
+ */
 class Crypto
 {
     // 加密引擎常量
@@ -392,66 +395,4 @@ class Crypto
         }
         throw new \BadMethodCallException("Method {$name} does not exist");
     }
-
-    /**
-     * 生成订单号
-     * @param string $prefix 前缀
-     * @return string 订单号
-     */
-    public function order(string $prefix = ''): string
-    {
-        $date = \date('YmdHis');
-        $random = \random_int(1000, 9999);
-        return $prefix . $date . $random;
-    }
-
-    /**
-     * 生成邀请码
-     * @param int $length 邀请码长度
-     * @param string $chars 可选字符集
-     * @return string 邀请码
-     */
-    public function invite(int $length = 6, string $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'): string
-    {
-        $inviteCode = '';
-        $charsLength = \strlen($chars);
-        for ($i = 0; $i < $length; $i++) {
-            $inviteCode .= $chars[\random_int(0, $charsLength - 1)];
-        }
-        return $inviteCode;
-    }
-
-    /**
-     * 生成URL安全码
-     * @param int $length 安全码长度
-     * @return string URL安全码
-     */
-    public function url(int $length = 16): string
-    {
-        $bytes = \random_bytes($length);
-        return \rtrim(\strtr(\base64_encode($bytes), '+/', '-_'), '=');
-    }
-
-    /**
-     * 生成注册码
-     * @param int $length 注册码长度
-     * @param int $segmentLength 分段长度
-     * @param string $separator 分隔符
-     * @return string 注册码
-     */
-    public function reg(int $length = 16, int $segmentLength = 4, string $separator = '-'): string
-    {
-        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $registrationCode = '';
-        $charsLength = \strlen($chars);
-        for ($i = 0; $i < $length; $i++) {
-            $registrationCode .= $chars[\random_int(0, $charsLength - 1)];
-            if (($i + 1) % $segmentLength === 0 && $i !== $length - 1) {
-                $registrationCode .= $separator;
-            }
-        }
-        return $registrationCode;
-    }
-
-
 }

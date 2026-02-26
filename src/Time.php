@@ -2,13 +2,16 @@
 /**
  * Time.php
  * @author cdyun(121625706@qq.com)
- * @date 2026/2/23 18:29
+ * @date 2026/2/25 00:55
  */
 
 declare (strict_types=1);
 
-namespace Cdyun\PhpTool\Time;
+namespace Cdyun\PhpTool;
 
+/**
+ * 日期时间工具类
+ */
 class Time
 {
     /**
