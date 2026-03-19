@@ -456,6 +456,7 @@ composer require cdyun/php-tool
 │   ├── Crypto.php    // 加解密主类（命名简洁）
 │   ├── Generate.php  // 代码生成工具类
 │   ├── Curl.php      // HTTP请求主类
+│   ├── Dir.php      // 文件目录处理类
 │   ├── helpers.php   // 全局辅助函数文件
 │   ├──......             // 其他│   
 │   
@@ -3097,6 +3098,41 @@ $response = Curl::patch('https://api.example.com/users/1', [
     'status' => 'active'
 ]);
 ```
+
+## 文件目录处理类
+
+### 使用示例
+
+##### scanFolder() - 搜索指定路径下的【直系】文件夹
+```php
+$list = Dir::scanFolder($path);
+```
+
+##### getFileContent() - 获取文件内容
+```php
+$content = Dir::getFileContent($path, $fileName);
+```
+
+##### listFileContent() - 获取指定路径文件夹下所有直系文件夹中所有指定文件名的php文件内容
+```php
+$list = Dir::listFileContent($path, $fileName);
+```
+
+##### deleteDirFile() - 清除指定文件夹下文件
+```php
+$list = Dir::deleteDirFile($dir_name);
+```
+
+##### scanFile() - 搜索文件夹下全部文件，指定扩展名，暂时不支持中文文件名
+```php
+$list = Dir::scanFile($path, $ext);
+```
+
+##### scanFileTree() - 搜索文件夹下全部文件返回树形结构，指定扩展名，暂时不支持中文文件名
+```php
+$list = Dir::scanFileTree($path, $prefix, $ext);
+```
+
 
 # 版本要求
 
