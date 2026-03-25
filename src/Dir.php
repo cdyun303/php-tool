@@ -10,7 +10,7 @@ declare (strict_types=1);
 namespace Cdyun\PhpTool;
 
 /**
- * 文件目录处理类
+ * 目录文件处理类
  */
 class Dir
 {

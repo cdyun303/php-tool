@@ -157,6 +157,58 @@ class Arr
     }
 
     /**
+     * 获取叶子节点的所有父节点 ID
+     * @param array $arr - 扁平化数组
+     * @param int|string|array $leafId - 叶子节点ID(支持数组)
+     * @param string $parentIdField - 父ID字段名
+     * @return array
+     * @author cdyun(121625706@qq.com)
+     */
+    public static function getParentIds(array $arr, int|string|array $leafId, string $parentIdField = 'parent_id'): array
+    {
+        // 支持数组输入
+        if (is_array($leafId)) {
+            $allParentIds = [];
+            foreach ($leafId as $id) {
+                $parentIds = self::getParentIds($arr, $id, $parentIdField);
+                $allParentIds = array_merge($allParentIds, $parentIds);
+            }
+            return array_values(array_unique($allParentIds));
+        }
+
+        $map = [];
+        foreach ($arr as $node) {
+            $map[$node['id']] = $node;
+        }
+
+        if (!isset($map[$leafId])) {
+            return [];
+        }
+
+        $parentIds = [];
+        $currentId = $leafId;
+
+        $max_depth = 100;
+        while ($max_depth-- > 0 && isset($map[$currentId]) && $map[$currentId][$parentIdField] != 0 && $map[$currentId][$parentIdField] !== null) {
+            $parentId = $map[$currentId][$parentIdField];
+
+            // 防止死循环（数据脏了的情况）
+            if ($parentId == $currentId) {
+                break;
+            }
+
+            $parentIds[] = $parentId;
+            $currentId = $parentId;
+
+            if (!isset($map[$currentId])) {
+                break;
+            }
+        }
+
+        return $parentIds;
+    }
+
+    /**
      * 获取数组中的值，支持点语法和数组嵌套键
      * @param array $array 数组
      * @param string|int|array $key 键名，可以是点语法字符串或数组

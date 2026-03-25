@@ -16,6 +16,7 @@ PHP8.1+ 通用工具包
         * [list() - 树形结构转数组](#list---树形结构转数组)
         * [level() - 数组转层级结构](#level---数组转层级结构)
         * [path() - 数组转路径结构](#path---数组转路径结构)
+        * [getParentIds() - 获取叶子节点的所有父节点ID](#getparentids---获取叶子节点的所有父节点id)
       * [数组访问和操作](#数组访问和操作)
         * [deepMerge() - 数组深度合并](#deepmerge---数组深度合并)
         * [get() - 数组获取值（支持点语法）](#get---数组获取值支持点语法)
@@ -428,7 +429,7 @@ PHP8.1+ 通用工具包
         * [putForm() - PUT表单请求](#putform---put表单请求)
         * [delete() - PUT请求](#delete---put请求)
         * [patch() - PATCH请求](#patch---patch请求)
-  * [文件目录处理类](#文件目录处理类)
+  * [目录文件处理](#目录文件处理)
     * [使用示例](#使用示例-9)
         * [scanFolder() - 搜索指定路径下的【直系】文件夹](#scanfolder---搜索指定路径下的直系文件夹)
         * [getFileContent() - 获取文件内容](#getfilecontent---获取文件内容)
@@ -464,7 +465,7 @@ composer require cdyun/php-tool
 │   ├── Crypto.php    // 加解密主类（命名简洁）
 │   ├── Generate.php  // 代码生成工具类
 │   ├── Curl.php      // HTTP请求主类
-│   ├── Dir.php      // 文件目录处理类
+│   ├── Dir.php      // 目录文件处理
 │   ├── helpers.php   // 全局辅助函数文件
 │   ├──......             // 其他│   
 │   
@@ -596,6 +597,19 @@ $path = Arr::path($data, 'id', 'parent_id', 'name', 'path', '/');
 //     ['id' => 3, 'name' => '部门3', 'parent_id' => 1, 'path' => '部门1/部门3'],
 //     ['id' => 4, 'name' => '部门4', 'parent_id' => 2, 'path' => '部门1/部门2/部门4']
 // ]
+```
+
+##### getParentIds() - 获取叶子节点的所有父节点ID
+```php
+ $arr = [
+     ['id' => 1, 'name' => '部门1', 'parent_id' => 0, 'path' => '部门1'],
+     ['id' => 2, 'name' => '部门2', 'parent_id' => 1, 'path' => '部门1/部门2'],
+     ['id' => 3, 'name' => '部门3', 'parent_id' => 1, 'path' => '部门1/部门3'],
+     ['id' => 4, 'name' => '部门4', 'parent_id' => 2, 'path' => '部门1/部门2/部门4']
+ ];
+$path = Arr::path($arr, 4, 'parent_id');
+// 输出的是字符串类型的id:
+// ['1','2']
 ```
 
 #### 数组访问和操作
@@ -3107,7 +3121,7 @@ $response = Curl::patch('https://api.example.com/users/1', [
 ]);
 ```
 
-## 文件目录处理类
+## 目录文件处理
 
 ### 使用示例
 
