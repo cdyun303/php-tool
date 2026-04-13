@@ -122,27 +122,28 @@ class Dir
 
     /**
      * 搜索文件夹下全部文件，指定扩展名，暂时不支持中文文件名
-     * @param string $path
-     * @param array $ext
+     * @param string $path - 搜索绝对路径
+     * @param array $ext - 扩展名
+     * @param bool $isFull - 是否返回绝对路径
      * @return array
      * @author cdyun(121625706@qq.com)
      */
-    public static function scanFile(string $path, array $ext = ['html']): array
+    public static function scanFile(string $path, array $ext = ['html'], bool $isFull = false): array
     {
         if (!is_dir($path))
             return array();
         // 兼容各操作系统
-        $path = rtrim(str_replace('\\', '/', $path), '/') . '/';
+        $path = rtrim(str_replace('\\', '/', $path), '/') . DIRECTORY_SEPARATOR;
         $result = array();
         $files = scandir($path);
         foreach ($files as $vo) {
             if ($vo != '.' && $vo != '..') {
-                $vo = iconv("GBK  ", "utf-8", $vo);
-                if (is_dir($path . '/' . $vo)) {
-                    $result = array_merge($result, self::scanFile($path . '/' . $vo, $ext));
+                $vo = iconv("GBK", "utf-8", $vo);
+                if (is_dir($path . $vo)) {
+                    $result = array_merge($result, self::scanFile($path . $vo, $ext, $isFull));
                 } else {
                     if (in_array(pathinfo($vo, PATHINFO_EXTENSION), $ext)) {
-                        $result[] = basename($vo);
+                        $result[] = $isFull ? $path . basename($vo) : basename($vo);
                     }
                 }
             }
@@ -168,7 +169,7 @@ class Dir
         $files = scandir($path);
         foreach ($files as $vo) {
             if ($vo != '.' && $vo != '..') {
-                $vo = iconv("GBK  ", "utf-8", $vo);
+                $vo = iconv("GBK", "utf-8", $vo);
                 $value = $prefix ? $prefix . '/' . basename($vo) : basename($vo);
                 if (is_dir($path . '/' . $vo)) {
                     $t = [

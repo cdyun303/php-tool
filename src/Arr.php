@@ -209,6 +209,55 @@ class Arr
     }
 
     /**
+     * 获取所有子节点的 ID
+     * @param array $arr - 扁平化数组
+     * @param int|string|array $parentId - 父节点 ID(支持数组)
+     * @param string $parentIdField - 父 ID 字段名
+     * @param bool $withSelf - 是否包含自身
+     * @return array
+     * @author cdyun(12165706@qq.com)
+     */
+    public static function getChildIds(array $arr, int|string|array $parentId, string $parentIdField = 'parent_id', bool $withSelf = false): array
+    {
+        // 支持数组输入
+        if (is_array($parentId)) {
+            $allChildIds = [];
+            foreach ($parentId as $id) {
+                $childIds = self::getChildIds($arr, $id, $parentIdField, $withSelf);
+                $allChildIds = array_merge($allChildIds, $childIds);
+            }
+            return array_values(array_unique($allChildIds));
+        }
+
+        // 构建 id => node 映射
+        $map = [];
+        foreach ($arr as $node) {
+            $map[$node['id']] = $node;
+        }
+
+        $childIds = [];
+
+        // 如果包含自身，先添加自己
+        if ($withSelf && isset($map[$parentId])) {
+            $childIds[] = $parentId;
+        }
+
+        // 递归查找所有子节点
+        $findChildren = function($currentId) use (&$findChildren, &$map, &$childIds, $parentIdField) {
+            foreach ($map as $node) {
+                if ($node[$parentIdField] == $currentId) {
+                    $childIds[] = $node['id'];
+                    $findChildren($node['id']);
+                }
+            }
+        };
+
+        $findChildren($parentId);
+
+        return array_values(array_unique($childIds));
+    }
+
+    /**
      * 获取数组中的值，支持点语法和数组嵌套键
      * @param array $array 数组
      * @param string|int|array $key 键名，可以是点语法字符串或数组
