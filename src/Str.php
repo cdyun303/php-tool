@@ -1466,4 +1466,25 @@ class Str
     {
         return gzuncompress($compressed);
     }
+
+    /**
+     * 字符串转数字（int|float|string）
+     * 如果字符串是数字值，返回int|float；如果是字符串，返回字符串。
+     * @param string|int|float $value 字符串或数字值
+     * @return int|float|string 数字值或字符串
+     */
+    public static function toNumber(string|int|float $value): int|float|string
+    {
+        if (is_string($value) || is_numeric($value)) {
+            if (is_numeric($value)) {
+                $floatVal = (float)$value;
+                if ($floatVal == (int)$floatVal) {
+                    $value = (int)$floatVal;
+                } else {
+                    $value = $floatVal;
+                }
+            }
+        }
+        return $value;
+    }
 }

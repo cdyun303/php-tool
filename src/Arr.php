@@ -243,7 +243,7 @@ class Arr
         }
 
         // 递归查找所有子节点
-        $findChildren = function($currentId) use (&$findChildren, &$map, &$childIds, $parentIdField) {
+        $findChildren = function ($currentId) use (&$findChildren, &$map, &$childIds, $parentIdField) {
             foreach ($map as $node) {
                 if ($node[$parentIdField] == $currentId) {
                     $childIds[] = $node['id'];
@@ -1177,5 +1177,35 @@ class Arr
             }
         }
         return true;
+    }
+
+    /**
+     * 智能转换数组中的数字字符串：整数转 int，小数转 float
+     * 支持：整数、小数、正负数、科学计数法
+     *
+     * @param array $data 待处理的数组
+     * @return array 转换后的数组
+     */
+    public static function toNumbers(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = self::toNumbers($value);
+                continue;
+            }
+
+            if (is_string($value) || is_numeric($value)) {
+                if (is_numeric($value)) {
+                    // 先统一转为浮点数（完美兼容科学计数法如 1.5E3）
+                    $floatVal = (float)$value;
+                    if ($floatVal == (int)$floatVal) {
+                        $data[$key] = (int)$floatVal;
+                    } else {
+                        $data[$key] = $floatVal;
+                    }
+                }
+            }
+        }
+        return $data;
     }
 }
